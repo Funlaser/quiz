@@ -93,6 +93,8 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
 .p4{height:38%;background:linear-gradient(#4a4f6e,#2c3050);color:#e8eaff}
 #hEnd .tcols{flex:none;width:min(94vw,1200px);overflow:visible}
 #hEnd .podium.team{height:30vh}
+.qbonus{font-size:clamp(16px,3.6vmin,46px);font-weight:900;padding:.5vmin 3vmin;border-radius:99px;background:linear-gradient(90deg,var(--yel),var(--mag));color:#0a0a18;animation:pulse 1s infinite;text-align:center}
+@keyframes pulse{50%{transform:scale(1.06)}}
 .tdot{width:2.4vmin;height:2.4vmin;border-radius:50%;margin-top:.6vmin}
 .tbadge{padding:3px 12px;border-radius:99px;font-weight:900;color:#0a0a18;font-size:14px}
 /* ---------- PHONE ---------- */
@@ -141,7 +143,8 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
     <div class="chips" id="hChips"></div>
     <div class="row"><label>Mode<select id="sM"><option value="solo" selected>Chacun pour soi</option><option value="random">Équipes (au hasard)</option><option value="choose">Équipes (au choix)</option></select></label><label id="lNT" style="display:none">Nombre d'équipes<select id="sNT"><option>2</option><option>3</option><option>4</option></select></label><button class="ghost" id="hShuffle" style="display:none">🔀 Mélanger</button></div>
     <div class="row"><label>Questions<select id="sN"><option>10</option><option selected>15</option><option>20</option><option>30</option></select></label>
-      <label>Thème<select id="sT"><option value="mix" selected>Mix culture + blind test</option><option value="culture">Culture générale seulement</option><option value="music">Blind test seulement</option><option value="8090">Années 80 / 90 (questions + blind test)</option><option value="disney">Disney (questions + blind test)</option></select></label></div>
+      <label>Thème<select id="sT"><option value="mix" selected>Mix culture + blind test</option><option value="culture">Culture générale seulement</option><option value="music">Blind test seulement</option><option value="8090">Années 80 / 90 (questions + blind test)</option><option value="disney">Disney (questions + blind test)</option><option value="all">Tout mélangé (général + 80/90 + Disney)</option></select></label></div>
+    <div class="row"><label>Questions bonus<select id="sB"><option value="both" selected>Milieu (×2) et fin (×3)</option><option value="end">Fin seulement (×3)</option><option value="none">Aucune</option></select></label></div>
     <button id="hStart" disabled>Lancer la partie ▶</button>
   </div>
 </section>
@@ -157,7 +160,7 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
   <div class="bar"><i id="qBar"></i></div>
   <div class="qmain">
     <div class="qleft">
-      <div class="qtext"><div class="qbadge" id="qBadge"></div><div id="qText"></div><div class="eq" id="qEq" style="display:none"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="musicline" id="qMusic"></div></div>
+      <div class="qtext"><div class="qbonus" id="qBonus" style="display:none"></div><div class="qbadge" id="qBadge"></div><div id="qText"></div><div class="eq" id="qEq" style="display:none"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="musicline" id="qMusic"></div></div>
       <div class="opts" id="qOpts"></div>
       <div class="foot"><span class="answered" id="qAns"></span><button id="qNext">Passer ▶</button></div>
     </div>
@@ -193,6 +196,7 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
 <section class="screen pq" id="pQ">
   <div class="hd"><span id="pqNum"></span><span id="pqTeam" class="tbadge" style="display:none"></span><span id="pqTime"></span></div>
   <div class="bar"><i id="pqBar"></i></div>
+  <div class="qbonus" id="pqBonus" style="display:none"></div>
   <div class="qq" id="pqText"></div>
   <div class="pbtns" id="pqBtns"></div>
   <p class="mut" id="pqInfo" style="text-align:center;min-height:1.4em"></p>
@@ -2984,7 +2988,11 @@ async function buildQuestions(n,theme){
   let qPool=QUESTIONS, sPool=SONGS, cat='Blind test';
   if(theme==='8090'){qPool=QUESTIONS_8090;sPool=SONGS_8090;cat='Blind test 80/90';}
   else if(theme==='disney'){qPool=QUESTIONS_DISNEY;sPool=SONGS_DISNEY;cat='Blind test Disney';}
-  let nMusic = theme==='music'?n : theme==='culture'?0 : (theme==='mix'?Math.round(n*0.35):Math.round(n*0.4));
+  else if(theme==='all'){
+    qPool=[...QUESTIONS,...QUESTIONS_8090,...QUESTIONS_DISNEY];
+    const seen=new Set();sPool=[...SONGS,...SONGS_8090,...SONGS_DISNEY].filter(s=>{const k=norm(s[0]+s[1]);if(seen.has(k))return false;seen.add(k);return true;});
+  }
+  let nMusic = theme==='music'?n : theme==='culture'?0 : ((theme==='mix'||theme==='all')?Math.round(n*0.35):Math.round(n*0.4));
   const music=[];
   if(nMusic>0){
     const cands=shuffle(sPool);
@@ -3139,7 +3147,7 @@ function hostOnClose(c){
 }
 function qMsg(p){
   const q=H.qs[H.qi];
-  return {t:'q',team:teamInfo(p),i:H.qi,n:H.qs.length,kind:q.kind,q:q.q,opts:q.opts,time:q.time,remain:Math.max(0,q.time*1000-(Date.now()-H.qStart)),picked:p.choice};
+  return {t:'q',team:teamInfo(p),mult:q.mult||1,i:H.qi,n:H.qs.length,kind:q.kind,q:q.q,opts:q.opts,time:q.time,remain:Math.max(0,q.time*1000-(Date.now()-H.qStart)),picked:p.choice};
 }
 function revealMsg(p){
   const q=H.qs[H.qi];
@@ -3163,6 +3171,11 @@ async function startGame(){
   H.qs=r.qs;H.qi=-1;
   // sécurité : si la musique manquait, on complète avec des questions texte
   if(H.qs.length<n){const used=new Set(H.qs.map(q=>q.q));for(const q of shuffle(r.pool)){if(H.qs.length>=n)break;if(!used.has(q[0]))H.qs.push(textQuestion(q));}}
+  const bm=$('sB').value;H.qs.forEach(q=>{q.mult=1;});
+  if(bm!=='none'&&H.qs.length>=2){
+    H.qs[H.qs.length-1].mult=3;
+    if(bm==='both'&&H.qs.length>=4)H.qs[Math.ceil(H.qs.length/2)-1].mult=2;
+  }
   nextQuestion();
 }
 function nextQuestion(){
@@ -3173,6 +3186,7 @@ function nextQuestion(){
   show('hQ');$('hQ').classList.remove('rev');
   $('qNum').textContent='Question '+(H.qi+1)+'/'+H.qs.length;
   $('qBadge').textContent=q.cat;
+  const qb=$('qBonus');if(q.mult>1){qb.style.display='';qb.textContent='⭐ QUESTION BONUS ×'+q.mult+' ⭐';}else qb.style.display='none';
   $('qText').textContent=q.q;
   $('qMusic').textContent='';
   $('qEq').style.display=q.kind==='music'?'flex':'none';
@@ -3208,7 +3222,7 @@ function doReveal(){
     if(p.correct){
       p.streak++;
       const frac=Math.min(1,p.tAns/(q.time*1000));
-      p.gain=Math.round(1000*(1-0.5*frac))+(p.streak>=2?Math.min(p.streak-1,3)*100:0);
+      p.gain=(Math.round(1000*(1-0.5*frac))+(p.streak>=2?Math.min(p.streak-1,3)*100:0))*(q.mult||1);
     }else{p.streak=0;p.gain=0;}
     p.score+=p.gain;
   }
@@ -3377,6 +3391,7 @@ function pLobby(m){
 function pQuestion(m){
   P.qi=m.i;P.locked=m.picked!==null&&m.picked!==undefined;
   show('pQ');setBadge($('pqTeam'),m.team);
+  const pb=$('pqBonus');if(m.mult>1){pb.style.display='';pb.textContent='⭐ QUESTION BONUS ×'+m.mult+' ⭐';}else pb.style.display='none';
   $('pqNum').textContent='Question '+(m.i+1)+'/'+m.n;
   $('pqText').textContent=m.kind==='music'?'🎧 '+m.q:m.q;
   $('pqInfo').textContent=P.locked?'Réponse envoyée ✓':'';
