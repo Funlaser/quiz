@@ -82,6 +82,19 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
 .p3{height:55%;background:linear-gradient(#e59a5c,#b86a2a);color:#1a0d00}
 .rest{display:grid;grid-template-columns:1fr 1fr;gap:1vmin 3vmin;width:min(90vw,1100px)}
 
+.tcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(22vmin,1fr));gap:1.4vmin;flex:1;overflow:auto;align-content:start;padding:.5vmin}
+.tcol{background:var(--card);border-radius:1.6vmin;padding:1.2vmin;border-top:.9vmin solid #fff3;display:flex;flex-direction:column;gap:.8vmin;min-width:0}
+.thd{font-weight:900;font-size:clamp(15px,2.8vmin,32px)}
+.tcnt{color:var(--mut);font-weight:700}
+.tmem{background:var(--card2);border-radius:99px;padding:.6vmin 1.6vmin;font-weight:700;font-size:clamp(13px,2.4vmin,28px);animation:pop .3s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tmem.off{opacity:.35}
+.mvp{font-size:clamp(16px,3vmin,36px);color:var(--yel);font-weight:800;text-align:center}
+.restTitle{font-size:clamp(14px,2.4vmin,28px);color:var(--mut);text-transform:uppercase;letter-spacing:.12em;font-weight:800;text-align:center}
+.p4{height:38%;background:linear-gradient(#4a4f6e,#2c3050);color:#e8eaff}
+#hEnd .tcols{flex:none;width:min(94vw,1200px);overflow:visible}
+#hEnd .podium.team{height:30vh}
+.tdot{width:2.4vmin;height:2.4vmin;border-radius:50%;margin-top:.6vmin}
+.tbadge{padding:3px 12px;border-radius:99px;font-weight:900;color:#0a0a18;font-size:14px}
 /* ---------- PHONE ---------- */
 .ph{align-items:center;text-align:center;justify-content:center;gap:2.4vmin;max-width:560px;margin:0 auto;width:100%}
 .ph h1{font-size:clamp(30px,9vw,48px)}
@@ -126,8 +139,9 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
   <div class="lobR">
     <div class="topbar"><span id="hCount">0 joueur</span><span class="mut" style="font-size:.8em">Espace = lancer</span></div>
     <div class="chips" id="hChips"></div>
+    <div class="row"><label>Mode<select id="sM"><option value="solo" selected>Chacun pour soi</option><option value="random">Équipes (au hasard)</option><option value="choose">Équipes (au choix)</option></select></label><label id="lNT" style="display:none">Nombre d'équipes<select id="sNT"><option>2</option><option>3</option><option>4</option></select></label><button class="ghost" id="hShuffle" style="display:none">🔀 Mélanger</button></div>
     <div class="row"><label>Questions<select id="sN"><option>10</option><option selected>15</option><option>20</option><option>30</option></select></label>
-      <label>Thème<select id="sT"><option value="mix" selected>Mix culture + blind test</option><option value="culture">Culture générale seulement</option><option value="music">Blind test seulement</option></select></label></div>
+      <label>Thème<select id="sT"><option value="mix" selected>Mix culture + blind test</option><option value="culture">Culture générale seulement</option><option value="music">Blind test seulement</option><option value="8090">Années 80 / 90 (questions + blind test)</option><option value="disney">Disney (questions + blind test)</option></select></label></div>
     <button id="hStart" disabled>Lancer la partie ▶</button>
   </div>
 </section>
@@ -155,6 +169,8 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
 <section class="screen" id="hEnd">
   <h1>Classement final</h1>
   <div class="podium" id="podium"></div>
+  <div class="mvp" id="mvp"></div>
+  <div class="restTitle" id="restTitle"></div>
   <div class="rest" id="rest"></div>
   <div style="display:flex;gap:2vmin;margin-top:1vmin"><button id="hAgain">Rejouer (mêmes joueurs)</button></div>
 </section>
@@ -172,9 +188,10 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
   <div class="big">🎮</div><h1 id="pHi">Prêt !</h1>
   <p>Tu es dans la partie.<br>Regarde l'écran, ça va bientôt commencer…</p>
   <span class="tag" id="pWaitInfo"></span>
+  <div id="pTeamBox" style="width:100%;display:flex;flex-direction:column;gap:10px;align-items:center"></div>
 </section>
 <section class="screen pq" id="pQ">
-  <div class="hd"><span id="pqNum"></span><span id="pqTime"></span></div>
+  <div class="hd"><span id="pqNum"></span><span id="pqTeam" class="tbadge" style="display:none"></span><span id="pqTime"></span></div>
   <div class="bar"><i id="pqBar"></i></div>
   <div class="qq" id="pqText"></div>
   <div class="pbtns" id="pqBtns"></div>
@@ -186,6 +203,7 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
   <div class="pts" id="prGain"></div>
   <p id="prAns" class="mut"></p>
   <span class="tag" id="prRank"></span>
+  <span class="tag" id="prTeam" style="display:none"></span>
   <p id="prStreak"></p>
 </section>
 <section class="screen ph" id="pEnd">
@@ -193,6 +211,7 @@ input,select{font:inherit;font-size:clamp(16px,2.4vmin,26px);padding:1.4vmin 2vm
   <h1>Partie terminée</h1>
   <div class="sub" id="peRank"></div>
   <div class="pts" id="peScore"></div>
+  <span class="tag" id="peTeam" style="display:none"></span>
   <p class="mut">Merci d'avoir joué !</p>
 </section>
 
@@ -2562,6 +2581,196 @@ const QUESTIONS = [
  ["Quelle couleur obtient-on en mélangeant du bleu et du jaune ?","Le vert",["L'orange","Le violet","Le marron"],"Culture"],
  ["Quel est l'ingrédient principal du guacamole ?","L'avocat",["Le concombre","Le poivron vert","La courgette"],"Cuisine"],
  ["De quel pays vient le sushi ?","Le Japon",["La Chine","La Corée","La Thaïlande"],"Cuisine"],
+
+ /* ---------- Suisse ---------- */
+ ["Quelle est la forme du drapeau suisse ?","Carrée",["Rectangulaire","Triangulaire","Ronde"],"Suisse"],
+ ["Quelle est la monnaie de la Suisse ?","Le franc suisse",["L'euro","La livre","La couronne"],"Suisse"],
+ ["Combien de langues nationales la Suisse compte-t-elle ?","4",["3","5","6"],"Suisse"],
+ ["Quel chocolat est connu pour sa forme de prisme triangulaire ?","Le Toblerone",["Le Snickers","Le Twix","Le Milka"],"Suisse"],
+ ["Quelle boisson suisse est fabriquée à base de petit-lait ?","Le Rivella",["L'Ovomaltine","Le Coca-Cola","Le Fanta"],"Suisse"],
+ ["Quel tunnel ferroviaire ouvert en 2016 est le plus long du monde ?","Le tunnel de base du Saint-Gothard",["Le tunnel du Simplon","Le tunnel du Lötschberg","L'Eurotunnel"],"Suisse"],
+ ["Près de quelle ville se trouve le CERN ?","Genève",["Lausanne","Zurich","Bâle"],"Suisse"],
+ ["Quel animal figure sur les armoiries de Berne ?","L'ours",["Le lion","L'aigle","Le loup"],"Suisse"],
+ ["Quel héros légendaire suisse aurait tiré sur une pomme avec son arbalète ?","Guillaume Tell",["Robin des Bois","Zorro","Ulysse"],"Suisse"],
+ ["Quel fromage suisse est célèbre pour ses grands trous ?","L'emmental",["Le gruyère","La tête de moine","Le vacherin"],"Suisse"],
+ ["Quel est le chef-lieu du canton de Vaud ?","Lausanne",["Montreux","Vevey","Yverdon"],"Suisse"],
+ ["Quel est le chef-lieu du canton du Valais ?","Sion",["Martigny","Sierre","Brigue"],"Suisse"],
+ ["Quel est le chef-lieu du canton du Jura ?","Delémont",["Porrentruy","Saignelégier","Moutier"],"Suisse"],
+ ["Quel est le chef-lieu du canton du Tessin ?","Bellinzone",["Lugano","Locarno","Ascona"],"Suisse"],
+ ["Quelle montagne en forme de pyramide domine Zermatt ?","Le Cervin",["L'Eiger","Le Mönch","Le Pilate"],"Suisse"],
+ ["Quel est le plus grand canton de Suisse par sa superficie ?","Les Grisons",["Le Valais","Berne","Le Tessin"],"Suisse"],
+ ["Quel jour fête-t-on la fête nationale suisse ?","Le 1er août",["Le 14 juillet","Le 1er mai","Le 11 novembre"],"Suisse"],
+ ["Quelle marque suisse est célèbre pour son couteau multifonctions rouge ?","Victorinox",["Opinel","Leatherman","Laguiole"],"Suisse"],
+ ["Quelle ville suisse est célèbre pour son Jet d'eau ?","Genève",["Lausanne","Neuchâtel","Lucerne"],"Suisse"],
+ ["Quelle industrie a fait la réputation de La Chaux-de-Fonds et du Locle ?","L'horlogerie",["La pêche","Le chocolat","La navigation"],"Suisse"],
+ ["Quel vin rosé est une spécialité du canton de Neuchâtel ?","L'Œil-de-Perdrix",["Le Fendant","Le Dézaley","La Dôle"],"Suisse"],
+ ["Quelle ville suisse accueille le siège de la FIFA ?","Zurich",["Genève","Berne","Lausanne"],"Suisse"],
+ ["Quelle ville suisse accueille le siège du Comité international olympique ?","Lausanne",["Genève","Zurich","Montreux"],"Suisse"],
+ ["Quel personnage accompagne Saint-Nicolas en Suisse romande ?","Le Père Fouettard",["Le Grinch","Le Bonhomme Hiver","Le Marchand de sable"],"Suisse"],
+ ["En quelle année la Confédération suisse aurait-elle été fondée, selon la tradition ?","1291",["1515","1648","1848"],"Suisse"],
+ ["Comment dit-on « merci » en allemand ?","Danke",["Gracias","Grazie","Obrigado"],"Suisse"],
+ ["Comment dit-on « merci » en italien ?","Grazie",["Danke","Gracias","Thanks"],"Suisse"],
+
+ /* ---------- Star Wars ---------- */
+ ["Qui a construit le droïde C-3PO ?","Anakin Skywalker",["Obi-Wan Kenobi","Han Solo","Lando Calrissian"],"Star Wars"],
+ ["Comment s'appelle la sœur jumelle de Luke Skywalker ?","Leia",["Padmé","Rey","Jyn"],"Star Wars"],
+ ["Comment s'appelle le héros de la série The Mandalorian ?","Din Djarin",["Boba Fett","Jango Fett","Cad Bane"],"Star Wars"],
+ ["Comment s'appelle le petit personnage vert que Din Djarin protège ?","Grogu",["Yoda","Wicket","Ahsoka"],"Star Wars"],
+ ["Quelle est la couleur du sabre laser de Dark Vador ?","Rouge",["Bleu","Vert","Violet"],"Star Wars"],
+ ["Comment s'appelle le peuple de petits ours qui vit sur Endor ?","Les Ewoks",["Les Wookiees","Les Jawas","Les Gungans"],"Star Wars"],
+ ["Quel acteur joue Han Solo dans la trilogie originale ?","Harrison Ford",["Mark Hamill","Alec Guinness","Tom Hanks"],"Star Wars"],
+ ["Qui est le maître sith de Dark Vador ?","L'Empereur Palpatine",["Le comte Dooku","Dark Maul","Snoke"],"Star Wars"],
+ ["Comment s'appelle la planète de glace où les rebelles ont une base dans L'Empire contre-attaque ?","Hoth",["Endor","Tatooine","Dagobah"],"Star Wars"],
+ ["Sur quelle planète marécageuse Luke retrouve-t-il Yoda ?","Dagobah",["Hoth","Endor","Kamino"],"Star Wars"],
+ ["Quel droïde en forme de ballon apparaît dans Le Réveil de la Force ?","BB-8",["R2-D2","K-2SO","D-O"],"Star Wars"],
+ ["Qui a créé Star Wars ?","George Lucas",["Steven Spielberg","James Cameron","Ridley Scott"],"Star Wars"],
+ ["Comment commence chaque film Star Wars ?","« Il y a bien longtemps, dans une galaxie lointaine… »",["« Dans un futur proche… »","« Il était une fois… »","« En l'an 3000… »"],"Star Wars"],
+ ["Comment s'appelle l'arme géante de l'Empire capable de détruire une planète ?","L'Étoile de la mort",["Le Faucon Millenium","Le Destroyer","La Station Alpha"],"Star Wars"],
+ ["Comment s'appelle le meilleur ami de Luke Skywalker, un droïde bleu et blanc ?","R2-D2",["C-3PO","BB-8","IG-88"],"Star Wars"],
+
+ /* ---------- Cinéma, séries, jeux ---------- */
+ ["Quel est le nom du cow-boy dans Toy Story ?","Woody",["Buzz","Rex","Jessie"],"Cinéma"],
+ ["Quel est le nom de l'ogre vert du film d'animation ?","Shrek",["Hulk","Gru","Fiona"],"Cinéma"],
+ ["Comment s'appelle le bonhomme de neige dans La Reine des neiges ?","Olaf",["Sven","Kristoff","Hans"],"Cinéma"],
+ ["Quel acteur joue Jack dans Titanic ?","Leonardo DiCaprio",["Brad Pitt","Johnny Depp","Tom Cruise"],"Cinéma"],
+ ["Qui a réalisé Jurassic Park ?","Steven Spielberg",["George Lucas","James Cameron","Tim Burton"],"Cinéma"],
+ ["Quel acteur incarne le pirate Jack Sparrow ?","Johnny Depp",["Orlando Bloom","Brad Pitt","Keanu Reeves"],"Cinéma"],
+ ["Quel sorcier du Seigneur des anneaux est surnommé « le Gris » ?","Gandalf",["Saroumane","Dumbledore","Radagast"],"Cinéma"],
+ ["Quelle série met en scène la lutte pour le Trône de fer ?","Game of Thrones",["The Witcher","Vikings","Rome"],"Cinéma"],
+ ["Quelle famille jaune vit à Springfield ?","Les Simpson",["Les Griffin","Les Pierrafeu","Les Jetson"],"Cinéma"],
+ ["Quel super-héros porte un bouclier rond aux couleurs du drapeau américain ?","Captain America",["Iron Man","Thor","Hulk"],"Cinéma"],
+ ["Quel super-héros vit à Gotham City ?","Batman",["Superman","Spider-Man","Flash"],"Cinéma"],
+ ["Qui est le meilleur ami d'Harry Potter ?","Ron Weasley",["Drago Malefoy","Neville Londubat","Hagrid"],"Cinéma"],
+ ["Comment s'appelle le héros de la série de jeux The Legend of Zelda ?","Link",["Zelda","Ganon","Mario"],"Jeux vidéo"],
+ ["Quel est le hérisson bleu de Sega ?","Sonic",["Tails","Knuckles","Shadow"],"Jeux vidéo"],
+ ["Dans quel jeu affronte-t-on des Creepers ?","Minecraft",["Fortnite","Roblox","Among Us"],"Jeux vidéo"],
+ ["Quel Pokémon jaune est la mascotte de la série ?","Pikachu",["Salamèche","Bulbizarre","Carapuce"],"Jeux vidéo"],
+ ["Quel est le frère de Mario ?","Luigi",["Wario","Yoshi","Bowser"],"Jeux vidéo"],
+
+ /* ---------- Géographie ---------- */
+ ["Quelle est la capitale du Canada ?","Ottawa",["Toronto","Montréal","Vancouver"],"Géographie"],
+ ["Quelle est la capitale du Brésil ?","Brasilia",["Rio de Janeiro","São Paulo","Salvador"],"Géographie"],
+ ["Quelle est la capitale de la Turquie ?","Ankara",["Istanbul","Izmir","Antalya"],"Géographie"],
+ ["Quelle est la capitale du Maroc ?","Rabat",["Casablanca","Marrakech","Fès"],"Géographie"],
+ ["Quelle est la capitale de la Nouvelle-Zélande ?","Wellington",["Auckland","Christchurch","Queenstown"],"Géographie"],
+ ["Quelle est la capitale de l'Inde ?","New Delhi",["Mumbai","Calcutta","Bangalore"],"Géographie"],
+ ["Quelle est la capitale de la Suède ?","Stockholm",["Göteborg","Malmö","Oslo"],"Géographie"],
+ ["Quelle est la capitale des Pays-Bas ?","Amsterdam",["La Haye","Rotterdam","Utrecht"],"Géographie"],
+ ["Quelle est la capitale de l'Autriche ?","Vienne",["Salzbourg","Innsbruck","Graz"],"Géographie"],
+ ["Quelle est la capitale du Portugal ?","Lisbonne",["Porto","Faro","Madrid"],"Géographie"],
+ ["Quel fleuve traverse Paris ?","La Seine",["La Loire","Le Rhône","La Garonne"],"Géographie"],
+ ["Quel est le plus long fleuve d'Afrique ?","Le Nil",["Le Congo","Le Niger","Le Zambèze"],"Géographie"],
+ ["Quel est le plus haut sommet du monde ?","L'Everest",["Le K2","Le Mont Blanc","Le Kilimandjaro"],"Géographie"],
+ ["Dans quel pays se trouve la tour de Pise ?","L'Italie",["L'Espagne","La Grèce","La France"],"Géographie"],
+ ["Dans quel pays se trouve le Taj Mahal ?","L'Inde",["Le Pakistan","L'Iran","Le Bangladesh"],"Géographie"],
+ ["Dans quel pays se trouve l'Opéra de Sydney ?","L'Australie",["La Nouvelle-Zélande","Les États-Unis","Le Canada"],"Géographie"],
+ ["Dans quel pays se trouve la Sagrada Família ?","L'Espagne",["L'Italie","Le Portugal","La France"],"Géographie"],
+ ["Dans quel pays se trouvent les pyramides de Gizeh ?","L'Égypte",["Le Maroc","La Jordanie","Le Soudan"],"Géographie"],
+ ["Quel pays a pour drapeau un grand disque rouge sur fond blanc ?","Le Japon",["La Corée du Sud","Le Bangladesh","La Suisse"],"Géographie"],
+ ["Combien d'étoiles compte le drapeau des États-Unis ?","50",["13","48","52"],"Géographie"],
+ ["Quel est le plus grand continent ?","L'Asie",["L'Afrique","L'Amérique du Nord","L'Europe"],"Géographie"],
+ ["Quel est le pays le plus peuplé du monde ?","L'Inde",["La Chine","Les États-Unis","L'Indonésie"],"Géographie"],
+ ["Quelle île est surnommée « l'île de Beauté » ?","La Corse",["La Sardaigne","La Sicile","La Crète"],"Géographie"],
+ ["Quel pays est célèbre pour ses fjords ?","La Norvège",["La Suède","La Finlande","Le Danemark"],"Géographie"],
+ ["Quelle mer sépare l'Europe de l'Afrique ?","La Méditerranée",["La mer Rouge","La mer Baltique","La mer Noire"],"Géographie"],
+
+ /* ---------- Sciences ---------- */
+ ["Quelle est la planète rouge ?","Mars",["Vénus","Jupiter","Mercure"],"Sciences"],
+ ["Combien y a-t-il de planètes dans notre système solaire ?","8",["7","9","10"],"Sciences"],
+ ["À quelle température l'eau bout-elle au niveau de la mer ?","100 °C",["90 °C","80 °C","120 °C"],"Sciences"],
+ ["Quel scientifique est associé à la chute d'une pomme et à la gravité ?","Isaac Newton",["Albert Einstein","Galilée","Charles Darwin"],"Sciences"],
+ ["Qui a élaboré la théorie de la relativité ?","Albert Einstein",["Isaac Newton","Marie Curie","Nikola Tesla"],"Sciences"],
+ ["Quel gaz les plantes absorbent-elles pour la photosynthèse ?","Le dioxyde de carbone",["L'oxygène","L'azote","L'hélium"],"Sciences"],
+ ["Quel métal est liquide à température ambiante ?","Le mercure",["Le plomb","L'aluminium","Le zinc"],"Sciences"],
+ ["Quelle planète est célèbre pour ses anneaux ?","Saturne",["Mars","Mercure","Vénus"],"Sciences"],
+ ["Comment s'appelle notre galaxie ?","La Voie lactée",["Andromède","Orion","Le Sombrero"],"Sciences"],
+ ["Qui a découvert la pénicilline ?","Alexander Fleming",["Louis Pasteur","Marie Curie","Robert Koch"],"Sciences"],
+ ["Quel est le symbole chimique du fer ?","Fe",["Fr","F","Ir"],"Sciences"],
+ ["Quel est le symbole chimique du sodium ?","Na",["So","S","Sn"],"Sciences"],
+ ["Quel organe pompe le sang dans le corps ?","Le cœur",["Le foie","Les poumons","Le cerveau"],"Sciences"],
+ ["Comment s'appelle le satellite naturel de la Terre ?","La Lune",["Phobos","Titan","Europe"],"Sciences"],
+
+ /* ---------- Animaux ---------- */
+ ["Quel est le plus grand félin du monde ?","Le tigre",["Le lion","Le jaguar","Le léopard"],"Animaux"],
+ ["Combien de bosses possède un dromadaire ?","1",["2","3","4"],"Animaux"],
+ ["Comment s'appelle le petit de la vache ?","Le veau",["Le poulain","L'agneau","Le chevreau"],"Animaux"],
+ ["Comment s'appelle le petit du cheval ?","Le poulain",["Le veau","L'agneau","Le porcelet"],"Animaux"],
+ ["Quel oiseau ne sait pas voler ?","L'autruche",["La mouette","Le moineau","L'aigle"],"Animaux"],
+ ["Quel insecte fabrique le miel ?","L'abeille",["La guêpe","La fourmi","Le bourdon"],"Animaux"],
+ ["Combien de pattes possède un insecte ?","6",["4","8","10"],"Animaux"],
+ ["Quel est le plus grand animal terrestre ?","L'éléphant d'Afrique",["La girafe","Le rhinocéros","L'hippopotame"],"Animaux"],
+ ["De quoi se nourrit principalement le panda géant ?","De bambou",["D'eucalyptus","De poisson","De miel"],"Animaux"],
+ ["Quel est le seul mammifère capable de voler vraiment ?","La chauve-souris",["L'écureuil volant","Le colibri","Le pingouin"],"Animaux"],
+ ["Quel animal est célèbre pour changer de couleur ?","Le caméléon",["Le lézard","La salamandre","Le crocodile"],"Animaux"],
+ ["Quel animal construit des barrages dans les rivières ?","Le castor",["La loutre","Le rat","Le blaireau"],"Animaux"],
+
+ /* ---------- Culture, arts, musique ---------- */
+ ["Qui a peint « Guernica » ?","Pablo Picasso",["Salvador Dalí","Joan Miró","Henri Matisse"],"Culture"],
+ ["Qui a composé la 9e symphonie, avec l'Ode à la joie ?","Beethoven",["Mozart","Bach","Chopin"],"Culture"],
+ ["Qui a composé « Les Quatre Saisons » ?","Vivaldi",["Bach","Mozart","Haydn"],"Culture"],
+ ["Combien de cordes possède une guitare classique ?","6",["4","5","8"],"Culture"],
+ ["Qui a créé le détective Sherlock Holmes ?","Arthur Conan Doyle",["Agatha Christie","Edgar Allan Poe","Jules Verne"],"Culture"],
+ ["Qui a écrit « Le Petit Prince » ?","Antoine de Saint-Exupéry",["Jules Verne","Victor Hugo","Albert Camus"],"Culture"],
+ ["Qui a écrit « Roméo et Juliette » ?","William Shakespeare",["Molière","Victor Hugo","Charles Dickens"],"Culture"],
+ ["Qui a écrit « Vingt mille lieues sous les mers » ?","Jules Verne",["Alexandre Dumas","Victor Hugo","Émile Zola"],"Culture"],
+ ["Quel est le musée le plus visité de Paris ?","Le Louvre",["Le musée d'Orsay","Le centre Pompidou","Le musée Rodin"],"Culture"],
+ ["Comment dit-on « bonjour » en espagnol ?","Hola",["Ciao","Hallo","Olá"],"Culture"],
+ ["Quelle est la langue officielle du Brésil ?","Le portugais",["L'espagnol","Le brésilien","L'anglais"],"Culture"],
+ ["Combien de lettres compte l'alphabet français ?","26",["24","25","28"],"Culture"],
+ ["Quel chanteur est surnommé « le Roi de la pop » ?","Michael Jackson",["Elvis Presley","Prince","Justin Bieber"],"Musique"],
+ ["Quel chanteur était surnommé « le King » ?","Elvis Presley",["Michael Jackson","Frank Sinatra","Johnny Hallyday"],"Musique"],
+ ["Quel groupe britannique était composé de John, Paul, George et Ringo ?","Les Beatles",["Les Rolling Stones","Queen","Oasis"],"Musique"],
+ ["De quel pays vient le groupe ABBA ?","La Suède",["La Norvège","Le Danemark","La Finlande"],"Musique"],
+ ["Quel chanteur belge a sorti « Papaoutai » ?","Stromae",["Angèle","Jacques Brel","Gims"],"Musique"],
+ ["Quelle chanteuse est surnommée « Queen B » ?","Beyoncé",["Rihanna","Adele","Shakira"],"Musique"],
+ ["Quelle chanteuse a fait la tournée mondiale « Eras Tour » ?","Taylor Swift",["Dua Lipa","Billie Eilish","Ariana Grande"],"Musique"],
+
+ /* ---------- Histoire ---------- */
+ ["Qui a été le premier président des États-Unis ?","George Washington",["Abraham Lincoln","Thomas Jefferson","John Adams"],"Histoire"],
+ ["Quel peuple a construit les pyramides de Gizeh ?","Les Égyptiens",["Les Mayas","Les Romains","Les Grecs"],"Histoire"],
+ ["En quelle année la Révolution française a-t-elle commencé ?","1789",["1769","1799","1815"],"Histoire"],
+ ["Quel roi de France était surnommé « le Roi-Soleil » ?","Louis XIV",["Louis XVI","Charlemagne","Henri IV"],"Histoire"],
+ ["Quelle ville romaine a été ensevelie par l'éruption du Vésuve en 79 ?","Pompéi",["Rome","Carthage","Athènes"],"Histoire"],
+ ["Quel paquebot a coulé en 1912 après avoir heurté un iceberg ?","Le Titanic",["Le Lusitania","Le Queen Mary","L'Olympic"],"Histoire"],
+ ["Qui a atteint l'Amérique en 1492 ?","Christophe Colomb",["Magellan","Vasco de Gama","Marco Polo"],"Histoire"],
+ ["Quelle reine britannique a régné de 1952 à 2022 ?","Élisabeth II",["Victoria","Élisabeth I","Anne"],"Histoire"],
+ ["Quel empereur français a été vaincu à Waterloo en 1815 ?","Napoléon Ier",["Napoléon III","Louis XIV","Charlemagne"],"Histoire"],
+ ["En quelle année le mur de Berlin est-il tombé ?","1989",["1979","1985","1991"],"Histoire"],
+
+ /* ---------- Sport ---------- */
+ ["Quel sport pratique Roger Federer ?","Le tennis",["Le golf","Le ski","Le badminton"],"Sport"],
+ ["Combien de joueurs une équipe de basket aligne-t-elle sur le terrain ?","5",["6","7","11"],"Sport"],
+ ["Combien de joueurs une équipe de volley aligne-t-elle sur le terrain ?","6",["5","7","9"],"Sport"],
+ ["Quel sport se joue avec un volant ?","Le badminton",["Le tennis","Le squash","Le ping-pong"],"Sport"],
+ ["Quel tournoi de tennis se joue sur gazon à Londres ?","Wimbledon",["Roland-Garros","L'US Open","L'Open d'Australie"],"Sport"],
+ ["Combien d'anneaux compte le symbole olympique ?","5",["4","6","7"],"Sport"],
+ ["De quelle couleur est le maillot du leader du Tour de France ?","Jaune",["Vert","Rouge","Bleu"],"Sport"],
+ ["Combien de minutes dure un match de football, sans prolongation ?","90",["60","80","100"],"Sport"],
+
+ /* ---------- Cuisine ---------- */
+ ["Dans quel pays la pizza est-elle née ?","En Italie",["En France","En Grèce","En Espagne"],"Cuisine"],
+ ["Quel est l'ingrédient principal du houmous ?","Les pois chiches",["Les lentilles","Les haricots","L'aubergine"],"Cuisine"],
+ ["Quel fromage met-on sur une pizza margherita ?","La mozzarella",["Le cheddar","Le comté","Le brie"],"Cuisine"],
+ ["Quelle épice est la plus chère du monde ?","Le safran",["La cannelle","Le poivre","Le curcuma"],"Cuisine"],
+ ["Avec quoi fabrique-t-on le chocolat ?","Les fèves de cacao",["Les grains de café","La vanille","Les noisettes"],"Cuisine"],
+ ["De quel pays vient la paella ?","L'Espagne",["L'Italie","Le Portugal","Le Mexique"],"Cuisine"],
+ ["Quel légume fait pleurer quand on le coupe ?","L'oignon",["La carotte","Le poireau","Le concombre"],"Cuisine"],
+
+ /* ---------- Maths, logique, divers ---------- */
+ ["Combien font 7 × 8 ?","56",["54","48","63"],"Maths"],
+ ["Combien font 12 × 12 ?","144",["124","132","148"],"Maths"],
+ ["Combien de jours compte une année bissextile ?","366",["365","364","367"],"Maths"],
+ ["Lequel de ces nombres est un nombre premier ?","17",["15","21","27"],"Maths"],
+ ["Combien de secondes y a-t-il dans une heure ?","3600",["360","6000","1800"],"Maths"],
+ ["Combien de côtés a un octogone ?","8",["6","7","10"],"Maths"],
+ ["Combien font 9 × 9 ?","81",["72","89","91"],"Maths"],
+ ["Combien de mois de l'année ont au moins 28 jours ?","12",["1","2","11"],"Maths"],
+ ["Combien de couleurs compte l'arc-en-ciel ?","7",["5","6","8"],"Culture"],
+ ["Quelle marque de sport a pour logo une virgule appelée « Swoosh » ?","Nike",["Adidas","Puma","Reebok"],"Culture"],
+ ["Quelle entreprise fabrique l'iPhone ?","Apple",["Samsung","Google","Sony"],"Technologie"],
+ ["Que signifie « WWW » dans une adresse internet ?","World Wide Web",["World War Web","Web With Wifi","Wide World Window"],"Technologie"],
+ ["Quelle application a pour logo un fantôme jaune ?","Snapchat",["TikTok","Instagram","WhatsApp"],"Technologie"],
+ ["En quelle année le premier iPhone est-il sorti ?","2007",["2003","2010","2012"],"Technologie"],
 ];
 
 /* =====================================================================
@@ -2580,7 +2789,139 @@ const SONGS = [
  ["AC/DC","Thunderstruck"],["Nirvana","Smells Like Teen Spirit"],["Rihanna","Umbrella"],["Lady Gaga","Poker Face"],["Taylor Swift","Shake It Off"],
  ["Kendji Girac","Andalouse"],["Angèle","Balance ton quoi"],["Aya Nakamura","Djadja"],["Gims","Bella"],
  ["Les Rita Mitsouko","Marcia Baïla"],["Téléphone","Un autre monde"],["Jean-Jacques Goldman","Quand la musique est bonne"],["Claude François","Alexandrie Alexandra"],
+ ["Prince","Purple Rain"],["Madonna","Like a Prayer"],["Elton John","I'm Still Standing"],["Oasis","Wonderwall"],
+ ["The Beatles","Hey Jude"],["Stevie Wonder","Superstition"],["Earth, Wind & Fire","September"],["Village People","Y.M.C.A."],
+ ["Bon Jovi","Livin' on a Prayer"],["Guns N' Roses","Sweet Child o' Mine"],["Red Hot Chili Peppers","Californication"],["Linkin Park","In the End"],
+ ["Maroon 5","Sugar"],["Katy Perry","Roar"],["Sia","Chandelier"],["Billie Eilish","bad guy"],
+ ["Harry Styles","As It Was"],["Måneskin","Beggin'"],["Pink Floyd","Another Brick in the Wall"],["Led Zeppelin","Stairway to Heaven"],
+ ["Metallica","Enter Sandman"],["Black Eyed Peas","I Gotta Feeling"],["David Guetta","Titanium"],["Ariana Grande","7 rings"],
+ ["Zaz","Je veux"],["Vianney","Je m'en vais"],["Louane","Jour 1"],["Julien Doré","Le lac"],
+ ["Renaud","Mistral gagnant"],["Jacques Brel","Ne me quitte pas"],["Charles Aznavour","La Bohème"],["Christine and the Queens","Saint Claude"],
 ];
+
+/* =====================================================================
+   THÈME DISNEY — questions + blind test « De quel film vient ce morceau ? »
+   Morceaux : [artiste, titre, film]
+   ===================================================================== */
+const QUESTIONS_DISNEY = [
+ ["Comment s'appelle le lion héros du Roi Lion ?","Simba",["Mufasa","Scar","Nala"],"Disney"],
+ ["Qui est le méchant du Roi Lion ?","Scar",["Jafar","Gaston","Ursula"],"Disney"],
+ ["Quel animal est Pumbaa dans Le Roi Lion ?","Un phacochère",["Un sanglier","Un cochon","Un hippopotame"],"Disney"],
+ ["Quel animal est Timon, l'ami de Simba ?","Un suricate",["Un singe","Un lémurien","Un rat"],"Disney"],
+ ["Comment s'appelle le singe sage du Roi Lion ?","Rafiki",["Zazu","Timon","Mufasa"],"Disney"],
+ ["Dans quel film chante-t-on « Hakuna Matata » ?","Le Roi Lion",["Tarzan","Aladdin","Le Livre de la jungle"],"Disney"],
+ ["Comment s'appelle la petite sirène de Disney ?","Ariel",["Belle","Jasmine","Aurore"],"Disney"],
+ ["Comment s'appelle la sorcière de La Petite Sirène ?","Ursula",["Maléfique","Cruella","Mère Gothel"],"Disney"],
+ ["Comment s'appelle la princesse d'Aladdin ?","Jasmine",["Ariel","Belle","Mulan"],"Disney"],
+ ["Comment s'appelle le méchant d'Aladdin ?","Jafar",["Scar","Gaston","Hadès"],"Disney"],
+ ["Quel animal accompagne Aladdin ?","Un singe nommé Abu",["Un tigre nommé Rajah","Un perroquet nommé Iago","Un caméléon nommé Pascal"],"Disney"],
+ ["Quel fruit empoisonne Blanche-Neige ?","Une pomme",["Une poire","Une cerise","Une orange"],"Disney"],
+ ["Combien de nains accompagnent Blanche-Neige ?","7",["5","6","9"],"Disney"],
+ ["Comment s'appelle le renne de Kristoff dans La Reine des neiges ?","Sven",["Rudolph","Bambi","Olaf"],"Disney"],
+ ["Comment s'appelle la sœur d'Elsa ?","Anna",["Raiponce","Ariel","Mérida"],"Disney"],
+ ["Comment s'appelle le chandelier dans La Belle et la Bête ?","Lumière",["Big Ben","Zip","Mme Samovar"],"Disney"],
+ ["Quelle princesse Disney s'endort après s'être piqué le doigt sur un rouet ?","Aurore",["Cendrillon","Blanche-Neige","Raiponce"],"Disney"],
+ ["Quelle princesse perd sa pantoufle de verre au bal ?","Cendrillon",["Belle","Ariel","Mulan"],"Disney"],
+ ["Quelle princesse Disney a des cheveux magiques très longs ?","Raiponce",["Mérida","Tiana","Pocahontas"],"Disney"],
+ ["Comment s'appelle la guerrière chinoise de Disney ?","Mulan",["Pocahontas","Mérida","Tiana"],"Disney"],
+ ["Quelle princesse rousse tire à l'arc dans Rebelle ?","Mérida",["Vaiana","Anna","Ariel"],"Disney"],
+ ["Comment s'appelle le cerf ami de Panpan ?","Bambi",["Dumbo","Simba","Pongo"],"Disney"],
+ ["Quel éléphant de Disney peut voler avec ses grandes oreilles ?","Dumbo",["Babar","Bambi","Baloo"],"Disney"],
+ ["Quel personnage est le chien de compagnie de Mickey ?","Pluto",["Dingo","Rox","Milou"],"Disney"],
+ ["Comment s'appelle la petite amie de Mickey ?","Minnie",["Daisy","Clarabelle","Marguerite"],"Disney"],
+ ["Quel canard colérique est l'une des stars de Disney ?","Donald",["Picsou","Daffy","Dingo"],"Disney"],
+ ["Comment s'appelle l'ours du Livre de la jungle ?","Baloo",["Bagheera","Shere Khan","Kaa"],"Disney"],
+ ["Comment s'appelle le tigre du Livre de la jungle ?","Shere Khan",["Baloo","Kaa","Tigrou"],"Disney"],
+ ["Comment s'appelle le petit garçon du Livre de la jungle ?","Mowgli",["Tarzan","Aladdin","Simba"],"Disney"],
+ ["Quel ourson adore le miel ?","Winnie l'ourson",["Baloo","Paddington","Teddy"],"Disney"],
+ ["Comment s'appelle l'âne grincheux ami de Winnie ?","Bourriquet",["Tigrou","Porcinet","Coco Lapin"],"Disney"],
+ ["Comment s'appelle l'astronaute jouet de Toy Story ?","Buzz l'Éclair",["Woody","Rex","Zurg"],"Disney"],
+ ["Quel poisson amnésique aide Marin dans Le Monde de Nemo ?","Dory",["Bruce","Gill","Crush"],"Disney"],
+ ["Comment s'appelle le robot amoureux d'EVE ?","WALL-E",["Baymax","R2-D2","BB-8"],"Disney"],
+ ["Quel demi-dieu aide Vaiana dans son voyage ?","Maui",["Tamatoa","Te Fiti","Tui"],"Disney"],
+ ["Quel instrument joue Miguel dans Coco ?","La guitare",["Le violon","Le piano","La trompette"],"Disney"],
+ ["Dans Là-haut, comment la maison de Carl s'envole-t-elle ?","Grâce à des ballons",["Grâce à des fusées","Grâce à une tornade","Grâce à des ailes"],"Disney"],
+ ["Comment s'appelle le héros de Cars ?","Flash McQueen",["Martin","Doc Hudson","Sally"],"Disney"],
+ ["Comment s'appelle le robot gonflable des Nouveaux Héros ?","Baymax",["WALL-E","Hiro","Mégabot"],"Disney"],
+ ["Quelle souris est la mascotte de Disney ?","Mickey Mouse",["Jerry","Stuart Little","Rémy"],"Disney"],
+];
+const SONGS_DISNEY = [
+ ["Idina Menzel","Let It Go","La Reine des neiges"],["Kristen Bell","Do You Want to Build a Snowman?","La Reine des neiges"],
+ ["Elton John","Can You Feel the Love Tonight","Le Roi Lion"],["Elton John","Circle of Life","Le Roi Lion"],
+ ["Phil Collins","You'll Be in My Heart","Tarzan"],["Jodi Benson","Part of Your World","La Petite Sirène"],
+ ["Samuel E. Wright","Under the Sea","La Petite Sirène"],["Auli'i Cravalho","How Far I'll Go","Vaiana"],
+ ["Dwayne Johnson","You're Welcome","Vaiana"],["Peabo Bryson","A Whole New World","Aladdin"],
+ ["Robin Williams","Friend Like Me","Aladdin"],["Angela Lansbury","Beauty and the Beast","La Belle et la Bête"],
+ ["Randy Newman","You've Got a Friend in Me","Toy Story"],["Louis Prima","I Wan'na Be Like You","Le Livre de la jungle"],
+ ["Phil Harris","The Bare Necessities","Le Livre de la jungle"],["Carolina Gaitán","We Don't Talk About Bruno","Encanto"],
+ ["Mandy Moore","I See the Light","Raiponce"],["Christina Aguilera","Reflection","Mulan"],
+ ["Donny Osmond","I'll Make a Man Out of You","Mulan"],["Judy Kuhn","Colors of the Wind","Pocahontas"],
+ ["Cliff Edwards","When You Wish Upon a Star","Pinocchio"],["Julie Andrews","A Spoonful of Sugar","Mary Poppins"],
+ ["Dick Van Dyke","Chim Chim Cher-ee","Mary Poppins"],["Zac Efron","Breaking Free","High School Musical"],
+];
+const EXTRA_FILMS = ["Cendrillon","Blanche-Neige","Coco","Là-haut","Cars","Les Aristochats","Bambi","Dumbo"];
+
+/* =====================================================================
+   THÈME ANNÉES 80 / 90
+   ===================================================================== */
+const QUESTIONS_8090 = [
+ ["Quel jeu Nintendo de 1985 met en scène un plombier moustachu ?","Super Mario Bros.",["Tetris","Pac-Man","Zelda"],"Années 80/90"],
+ ["Quel jeu de blocs russe est sorti avec la Game Boy en 1989 ?","Tetris",["Pac-Man","Pong","Snake"],"Années 80/90"],
+ ["Comment s'appelle l'extraterrestre du film de Spielberg qui veut « téléphoner maison » ?","E.T.",["Alf","Gizmo","Yoda"],"Années 80/90"],
+ ["Quel film de 1985 voit Marty McFly voyager dans le temps ?","Retour vers le futur",["Terminator","Ghostbusters","Gremlins"],"Années 80/90"],
+ ["Dans Retour vers le futur, quelle voiture sert de machine à voyager dans le temps ?","La DeLorean",["La Ford Mustang","La Chevrolet Camaro","La Porsche 911"],"Années 80/90"],
+ ["Quel film de 1984 met en scène des chasseurs de fantômes ?","SOS Fantômes",["Gremlins","Karaté Kid","Retour vers le futur"],"Années 80/90"],
+ ["Dans quel film de 1987 dit-on « Personne ne met Bébé dans un coin » ?","Dirty Dancing",["Flashdance","Grease","Footloose"],"Années 80/90"],
+ ["Dans quel film de 1990 un enfant défend sa maison contre deux cambrioleurs maladroits ?","Maman, j'ai raté l'avion !",["Les Goonies","Gremlins","Beetlejuice"],"Années 80/90"],
+ ["En quelle année est sorti Jurassic Park ?","1993",["1991","1995","1997"],"Années 80/90"],
+ ["Quel film d'animation Disney de 1994 se déroule dans la savane africaine ?","Le Roi Lion",["Aladdin","Pocahontas","Hercule"],"Années 80/90"],
+ ["Quel est le premier long métrage Pixar, sorti en 1995 ?","Toy Story",["Monstres & Cie","Cars","1001 pattes"],"Années 80/90"],
+ ["Qui joue Neo dans Matrix en 1999 ?","Keanu Reeves",["Brad Pitt","Tom Cruise","Will Smith"],"Années 80/90"],
+ ["Quel film français de 1993 envoie un chevalier du Moyen Âge à notre époque ?","Les Visiteurs",["Les Anges gardiens","La Gloire de mon père","Le Grand Bleu"],"Années 80/90"],
+ ["Quel jouet virtuel à nourrir et à soigner fait fureur dans les années 90 ?","Le Tamagotchi",["Le Game Boy","Le Rubik's Cube","Le Walkman"],"Années 80/90"],
+ ["Quel appareil de Sony permet d'écouter ses cassettes en marchant ?","Le Walkman",["Le Discman","L'iPod","Le Minitel"],"Années 80/90"],
+ ["Quel casse-tête coloré inventé par un Hongrois fait fureur dans les années 80 ?","Le Rubik's Cube",["Le Tangram","Le Taquin","Le Sudoku"],"Années 80/90"],
+ ["Quel terminal français est l'ancêtre d'internet grand public ?","Le Minitel",["Le Tamagotchi","Le Walkman","Le Fax"],"Années 80/90"],
+ ["Quel jeu d'arcade de 1980 met en scène une boule jaune qui mange des fantômes ?","Pac-Man",["Space Invaders","Donkey Kong","Asteroids"],"Années 80/90"],
+ ["Sur quelle console Sega Sonic est-il apparu en 1991 ?","La Mega Drive",["La Super Nintendo","La Game Boy","La PlayStation"],"Années 80/90"],
+ ["Quelle console de Sony est sortie en 1994 au Japon ?","La PlayStation",["La Nintendo 64","La Dreamcast","La Super Nintendo"],"Années 80/90"],
+ ["En quelle année est sortie la Game Boy ?","1989",["1985","1992","1995"],"Années 80/90"],
+ ["Quelle franchise japonaise de créatures a envahi les cours de récré dans les années 90 ?","Pokémon",["Digimon","Yu-Gi-Oh!","Beyblade"],"Années 80/90"],
+ ["Qui a gagné la Coupe du monde de football en 1998 ?","La France",["Le Brésil","L'Italie","La Croatie"],"Années 80/90"],
+ ["Quelle équipe a gagné la Coupe du monde de football en 1986, avec Maradona ?","L'Argentine",["Le Brésil","L'Allemagne","L'Italie"],"Années 80/90"],
+ ["Quelle chanteuse est surnommée la Reine de la pop dans les années 80 ?","Madonna",["Cher","Tina Turner","Whitney Houston"],"Années 80/90"],
+ ["Quel girl band a chanté « Wannabe » en 1996 ?","Les Spice Girls",["Les Destiny's Child","Les All Saints","Les TLC"],"Années 80/90"],
+ ["Quel groupe de Seattle a sorti l'album « Nevermind » en 1991 ?","Nirvana",["Pearl Jam","Soundgarden","Green Day"],"Années 80/90"],
+ ["Quel chanteur a lancé le moonwalk en 1983 ?","Michael Jackson",["Prince","Madonna","David Bowie"],"Années 80/90"],
+ ["Quel album de Michael Jackson, sorti en 1982, est l'un des plus vendus de l'histoire ?","Thriller",["Bad","Dangerous","Off the Wall"],"Années 80/90"],
+ ["Quel boys band a chanté « I Want It That Way » ?","Les Backstreet Boys",["Les NSYNC","Les Take That","Les Boyzone"],"Années 80/90"],
+ ["Quel duo britannique a chanté « Wake Me Up Before You Go-Go » ?","Wham!",["Duran Duran","Spandau Ballet","Depeche Mode"],"Années 80/90"],
+ ["Comment s'appelle le héros de Dragon Ball ?","Sangoku",["Vegeta","Naruto","Luffy"],"Années 80/90"],
+ ["Quel dessin animé met en scène des chevaliers protégés par des armures de constellations ?","Les Chevaliers du Zodiaque",["Albator","Goldorak","Ken le Survivant"],"Années 80/90"],
+ ["Quelle tortue ninja porte un bandeau bleu ?","Leonardo",["Raphaël","Donatello","Michelangelo"],"Années 80/90"],
+ ["Quel président américain, ancien acteur, a gouverné de 1981 à 1989 ?","Ronald Reagan",["Jimmy Carter","George Bush","Bill Clinton"],"Années 80/90"],
+ ["Qui est devenu président de l'Afrique du Sud en 1994 ?","Nelson Mandela",["Desmond Tutu","Kofi Annan","Thabo Mbeki"],"Années 80/90"],
+ ["Quelle série suit six amis new-yorkais dans un café à partir de 1994 ?","Friends",["Seinfeld","How I Met Your Mother","Cheers"],"Années 80/90"],
+ ["Dans quelle série Will Smith joue-t-il un jeune de Philadelphie qui s'installe à Bel-Air ?","Le Prince de Bel-Air",["Sauvés par le gong","Madame est servie","Papa bricole"],"Années 80/90"],
+ ["Quelle série met en scène des maîtres-nageurs en Californie ?","Alerte à Malibu",["Beverly Hills","Melrose Place","Santa Barbara"],"Années 80/90"],
+ ["Quel film français de 1988 suit un plongeur en apnée ?","Le Grand Bleu",["Subway","Nikita","Léon"],"Années 80/90"],
+ ["Quel groupe britannique chantait « Wonderwall » dans les années 90 ?","Oasis",["Blur","Coldplay","Radiohead"],"Années 80/90"],
+];
+const SONGS_8090 = [
+ ["Michael Jackson","Thriller"],["Madonna","Material Girl"],["Cyndi Lauper","Girls Just Want to Have Fun"],["Wham!","Wake Me Up Before You Go-Go"],
+ ["Duran Duran","Hungry Like the Wolf"],["Depeche Mode","Enjoy the Silence"],["Eurythmics","Sweet Dreams (Are Made of This)"],["Tears for Fears","Everybody Wants to Rule the World"],
+ ["Dire Straits","Money for Nothing"],["Phil Collins","In the Air Tonight"],["Rick Astley","Never Gonna Give You Up"],["Bonnie Tyler","Total Eclipse of the Heart"],
+ ["Kim Wilde","Kids in America"],["Toto","Africa"],["Falco","Rock Me Amadeus"],["Simple Minds","Don't You (Forget About Me)"],
+ ["Pet Shop Boys","West End Girls"],["Jean-Jacques Goldman","Je te donne"],["Indochine","L'aventurier"],["Daniel Balavoine","Sauver l'amour"],
+ ["Début de Soirée","Nuit de folie"],["Desireless","Voyage voyage"],["Corona","The Rhythm of the Night"],
+ ["Backstreet Boys","I Want It That Way"],["Spice Girls","Wannabe"],["Britney Spears","...Baby One More Time"],["Oasis","Wonderwall"],
+ ["Nirvana","Smells Like Teen Spirit"],["Blur","Song 2"],["Aqua","Barbie Girl"],["Eiffel 65","Blue (Da Ba Dee)"],
+ ["Haddaway","What Is Love"],["2 Unlimited","No Limit"],["Snap!","Rhythm Is a Dancer"],["Ace of Base","The Sign"],
+ ["TLC","No Scrubs"],["Alanis Morissette","You Oughta Know"],["Los del Río","Macarena"],["Vengaboys","Boom, Boom, Boom, Boom!!"],
+ ["Cher","Believe"],["Lou Bega","Mambo No. 5"],["Mylène Farmer","Désenchantée"],["MC Solaar","Nouveau western"],
+ ["Natalie Imbruglia","Torn"],["Robbie Williams","Angels"],["Take That","Back for Good"],["Stephan Eicher","Déjeuner en paix"],
+];
+
 const MUSIC_TIME = 20, TEXT_TIME = 15;
 
 /* ===================== utilitaires ===================== */
@@ -2625,37 +2966,46 @@ function textQuestion(q){
   const opts=shuffle([q[1],...q[2]]);
   return {kind:'text',cat:q[3],q:q[0],opts,correct:opts.indexOf(q[1]),time:TEXT_TIME};
 }
-function musicQuestion(song,url){
+function musicQuestion(song,url,pool,cat){
+  if(song[2]){ // thème Disney : de quel film vient ce morceau ?
+    const films=[...new Set(pool.map(s=>s[2]).filter(f=>f&&f!==song[2]))];
+    const opts=shuffle([song[2],...shuffle([...films,...EXTRA_FILMS.filter(f=>f!==song[2]&&!films.includes(f))]).slice(0,3)]);
+    return {kind:'music',cat:cat,q:'De quel film Disney vient ce morceau ?',opts,correct:opts.indexOf(song[2]),time:MUSIC_TIME,audio:url,reveal:song[0]+' — '+song[1]+' ('+song[2]+')'};
+  }
   const askArtist=Math.random()<0.5;
   const f=askArtist?0:1;
   const good=song[f];
-  const pool=[...new Set(SONGS.filter(s=>norm(s[0])!==norm(song[0])&&norm(s[1])!==norm(song[1])).map(s=>s[f]))];
-  const opts=shuffle([good,...shuffle(pool).slice(0,3)]);
-  return {kind:'music',cat:'Blind test',q:askArtist?'Qui chante ce morceau ?':'Quel est le titre de ce morceau ?',
+  const others=[...new Set(pool.filter(s=>norm(s[0])!==norm(song[0])&&norm(s[1])!==norm(song[1])).map(s=>s[f]))];
+  const opts=shuffle([good,...shuffle(others).slice(0,3)]);
+  return {kind:'music',cat:cat,q:askArtist?'Qui chante ce morceau ?':'Quel est le titre de ce morceau ?',
           opts,correct:opts.indexOf(good),time:MUSIC_TIME,audio:url,reveal:song[0]+' — '+song[1]};
 }
 async function buildQuestions(n,theme){
-  let nMusic = theme==='music'?n : theme==='culture'?0 : Math.round(n*0.35);
+  let qPool=QUESTIONS, sPool=SONGS, cat='Blind test';
+  if(theme==='8090'){qPool=QUESTIONS_8090;sPool=SONGS_8090;cat='Blind test 80/90';}
+  else if(theme==='disney'){qPool=QUESTIONS_DISNEY;sPool=SONGS_DISNEY;cat='Blind test Disney';}
+  let nMusic = theme==='music'?n : theme==='culture'?0 : (theme==='mix'?Math.round(n*0.35):Math.round(n*0.4));
   const music=[];
   if(nMusic>0){
-    const cands=shuffle(SONGS);
+    const cands=shuffle(sPool);
     let i=0;
     while(music.length<nMusic && i<cands.length){
       const batch=cands.slice(i,i+4); i+=4;
       $('hLoadTxt').textContent='Recherche des extraits musicaux… '+music.length+'/'+nMusic;
       const urls=await Promise.all(batch.map(findPreview));
-      batch.forEach((s,k)=>{ if(urls[k] && music.length<nMusic) music.push(musicQuestion(s,urls[k])); });
+      batch.forEach((s,k)=>{ if(urls[k] && music.length<nMusic) music.push(musicQuestion(s,urls[k],sPool,cat)); });
     }
   }
   const nText=n-music.length;
-  const text=shuffle(QUESTIONS).slice(0,nText).map(textQuestion);
-  return {qs:shuffle([...music,...text]), musicMissing:nMusic-music.length};
+  const text=shuffle(qPool).slice(0,nText).map(textQuestion);
+  return {qs:shuffle([...music,...text]), musicMissing:nMusic-music.length, pool:qPool};
 }
 
 /* =====================================================================
    MODE ÉCRAN (TV)
    ===================================================================== */
-const H={peer:null,code:'',players:new Map(),phase:'lobby',qs:[],qi:-1,qStart:0,tick:null,gain:{}};
+const H={peer:null,code:'',players:new Map(),phase:'lobby',qs:[],qi:-1,qStart:0,tick:null,gain:{},mode:'solo',nt:2};
+const TEAMS_ALL=[{name:'Rouge',color:'#ff4d6d'},{name:'Bleue',color:'#2ab8ff'},{name:'Verte',color:'#2fe27a'},{name:'Jaune',color:'#ffc400'}];
 
 function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s;}
 
@@ -2699,7 +3049,20 @@ function sortedPlayers(){return [...H.players.values()].sort((a,b)=>b.score-a.sc
 function onlinePlayers(){return [...H.players.values()].filter(p=>p.online);}
 function renderLobby(){
   const box=$('hChips');box.textContent='';
-  for(const p of H.players.values()){box.appendChild(el('span','chip'+(p.online?'':' off'),p.name));}
+  if(teamMode()){
+    box.className='tcols';
+    activeTeams().forEach((tm,i)=>{
+      const col=el('div','tcol');col.style.borderTopColor=tm.color;
+      const ms=membersOf(i);
+      const hd=el('div','thd','Équipe '+tm.name);hd.style.color=tm.color;hd.appendChild(el('span','tcnt',' · '+ms.length));
+      col.appendChild(hd);ms.forEach(p=>col.appendChild(el('div','tmem'+(p.online?'':' off'),p.name)));box.appendChild(col);
+    });
+    const none=[...H.players.values()].filter(p=>p.team==null||p.team>=H.nt);
+    if(none.length){const col=el('div','tcol');col.appendChild(el('div','thd','Pas encore d\'équipe'));none.forEach(p=>col.appendChild(el('div','tmem'+(p.online?'':' off'),p.name)));box.appendChild(col);}
+  }else{
+    box.className='chips';
+    for(const p of H.players.values()){box.appendChild(el('span','chip'+(p.online?'':' off'),p.name));}
+  }
   const n=onlinePlayers().length;
   $('hCount').textContent=n+(n>1?' joueurs connectés':' joueur connecté');
   $('hStart').disabled=n<1;
@@ -2707,6 +3070,37 @@ function renderLobby(){
 function send(p,m){try{if(p.conn&&p.conn.open)p.conn.send(m);}catch(e){}}
 function sendAll(fn){for(const p of H.players.values())send(p,typeof fn==='function'?fn(p):fn);}
 function rankOf(p){const s=sortedPlayers();return s.findIndex(x=>x===p)+1;}
+/* ---- équipes ---- */
+function teamMode(){return H.mode!=='solo';}
+function activeTeams(){return TEAMS_ALL.slice(0,H.nt);}
+function teamInfo(p){return teamMode()&&p.team!=null&&p.team<H.nt?TEAMS_ALL[p.team]:null;}
+function membersOf(i){return [...H.players.values()].filter(p=>p.team===i);}
+function teamTable(){
+  return activeTeams().map((t,i)=>{
+    const m=membersOf(i),sum=m.reduce((a,p)=>a+p.score,0),g=m.reduce((a,p)=>a+p.gain,0);
+    return {i,name:t.name,color:t.color,members:m,score:m.length?Math.round(sum/m.length):0,gain:m.length?Math.round(g/m.length):0};
+  }).sort((a,b)=>b.score-a.score||a.i-b.i);
+}
+function teamRankOf(p){return teamInfo(p)?teamTable().findIndex(t=>t.i===p.team)+1:0;}
+function teamScoreOf(p){return teamInfo(p)?teamTable().find(t=>t.i===p.team).score:0;}
+function smallestTeam(){
+  const sizes=activeTeams().map((_,i)=>membersOf(i).length),min=Math.min(...sizes);
+  const c=sizes.map((s,i)=>s===min?i:-1).filter(i=>i>=0);return c[Math.floor(Math.random()*c.length)];
+}
+function assignNew(p){p.team=smallestTeam();}
+function assignAll(){const ps=shuffle([...H.players.values()]);ps.forEach(p=>{p.team=null;});ps.forEach(assignNew);}
+function autoAssignMissing(){for(const p of H.players.values()){if(p.team==null||p.team>=H.nt)assignNew(p);}}
+function lobbyMsg(p){return {t:'lobby',n:H.players.size,mode:H.mode,teams:teamMode()?activeTeams():[],team:teamMode()?p.team:null};}
+function endMsg(p){return {t:'end',rank:rankOf(p),score:p.score,n:H.players.size,team:teamInfo(p),teamRank:teamRankOf(p),teamN:teamMode()?H.nt:0,teamScore:teamScoreOf(p)};}
+function applySettings(){
+  H.mode=$('sM').value;H.nt=parseInt($('sNT').value,10);
+  $('lNT').style.display=H.mode==='solo'?'none':'';
+  $('hShuffle').style.display=H.mode==='random'?'':'none';
+  if(H.mode==='solo'){for(const p of H.players.values())p.team=null;}
+  else if(H.mode==='random'){assignAll();}
+  else{for(const p of H.players.values())if(p.team!=null&&p.team>=H.nt)p.team=null;}
+  renderLobby();sendAll(lobbyMsg);
+}
 
 function hostOnData(c,d){
   if(!d||typeof d!=='object')return;
@@ -2717,14 +3111,19 @@ function hostOnData(c,d){
       let name=String(d.name||'Joueur').replace(/[<>]/g,'').trim().slice(0,14)||'Joueur';
       const taken=new Set([...H.players.values()].map(x=>x.name.toLowerCase()));
       let nm=name,k=2;while(taken.has(nm.toLowerCase()))nm=name+' '+(k++);
-      p={pid,name:nm,score:0,streak:0,conn:null,online:true,choice:null,tAns:0,gain:0,correct:false};
+      p={pid,name:nm,score:0,streak:0,conn:null,online:true,choice:null,tAns:0,gain:0,correct:false,team:null};
       H.players.set(pid,p);
     }
     p.conn=c;p.online=true;c._pid=pid;
+    if(teamMode()&&(p.team==null||p.team>=H.nt)&&(H.mode==='random'||H.phase!=='lobby'))assignNew(p);
     send(p,{t:'hi',name:p.name,phase:H.phase});
     sendState(p);
     if(H.phase==='lobby')renderLobby();
     if(H.phase==='question')updateAnswered();
+  }else if(d.t==='team'){
+    const p=H.players.get(c._pid),i=Number(d.i);
+    if(!p||H.mode!=='choose'||H.phase!=='lobby'||!(i>=0&&i<H.nt))return;
+    p.team=i;renderLobby();send(p,lobbyMsg(p));
   }else if(d.t==='answer'){
     const p=H.players.get(c._pid);
     if(!p||H.phase!=='question'||d.q!==H.qi||p.choice!==null)return;
@@ -2740,30 +3139,30 @@ function hostOnClose(c){
 }
 function qMsg(p){
   const q=H.qs[H.qi];
-  return {t:'q',i:H.qi,n:H.qs.length,kind:q.kind,q:q.q,opts:q.opts,time:q.time,remain:Math.max(0,q.time*1000-(Date.now()-H.qStart)),picked:p.choice};
+  return {t:'q',team:teamInfo(p),i:H.qi,n:H.qs.length,kind:q.kind,q:q.q,opts:q.opts,time:q.time,remain:Math.max(0,q.time*1000-(Date.now()-H.qStart)),picked:p.choice};
 }
 function revealMsg(p){
   const q=H.qs[H.qi];
-  return {t:'reveal',correct:p.correct,picked:p.choice,gain:p.gain,score:p.score,rank:rankOf(p),n:H.players.size,streak:p.streak,ans:q.correct,ansText:q.opts[q.correct],extra:q.reveal||''};
+  return {t:'reveal',team:teamInfo(p),teamRank:teamRankOf(p),teamScore:teamScoreOf(p),teamN:teamMode()?H.nt:0,correct:p.correct,picked:p.choice,gain:p.gain,score:p.score,rank:rankOf(p),n:H.players.size,streak:p.streak,ans:q.correct,ansText:q.opts[q.correct],extra:q.reveal||''};
 }
 function sendState(p){
-  if(H.phase==='lobby'||H.phase==='loading')send(p,{t:'lobby',n:H.players.size});
+  if(H.phase==='lobby'||H.phase==='loading')send(p,lobbyMsg(p));
   else if(H.phase==='question')send(p,qMsg(p));
   else if(H.phase==='reveal')send(p,revealMsg(p));
-  else if(H.phase==='end')send(p,{t:'end',rank:rankOf(p),score:p.score,n:H.players.size});
+  else if(H.phase==='end')send(p,endMsg(p));
 }
 
 async function startGame(){
   if(H.phase!=='lobby'||!onlinePlayers().length)return;
   const n=parseInt($('sN').value,10),theme=$('sT').value;
-  H.phase='loading';show('hLoad');
+  H.phase='loading';show('hLoad');if(teamMode())autoAssignMissing();
   for(const p of H.players.values()){p.score=0;p.streak=0;}
   const r=await buildQuestions(n,theme);
   if(!r.qs.length){H.phase='lobby';show('hLobby');banner('Aucune question disponible.',4000);return;}
   if(r.musicMissing>0)banner('Extraits musicaux introuvables : '+r.musicMissing+' remplacé(s) par de la culture générale.',6000);
   H.qs=r.qs;H.qi=-1;
   // sécurité : si la musique manquait, on complète avec des questions texte
-  if(H.qs.length<n){const used=new Set(H.qs.map(q=>q.q));for(const q of shuffle(QUESTIONS)){if(H.qs.length>=n)break;if(!used.has(q[0]))H.qs.push(textQuestion(q));}}
+  if(H.qs.length<n){const used=new Set(H.qs.map(q=>q.q));for(const q of shuffle(r.pool)){if(H.qs.length>=n)break;if(!used.has(q[0]))H.qs.push(textQuestion(q));}}
   nextQuestion();
 }
 function nextQuestion(){
@@ -2817,30 +3216,67 @@ function doReveal(){
   [...$('qOpts').children].forEach((d,i)=>{d.classList.add(i===q.correct?'yes':'no');d.querySelector('.N').textContent=counts[i];});
   if(q.reveal)$('qMusic').textContent='🎵 '+q.reveal;
   $('qTime').textContent='';$('qBar').style.width='0%';
-  const lb=$('qLb');lb.textContent='';
-  sortedPlayers().slice(0,6).forEach((p,i)=>{
-    const r=el('div','lb');r.appendChild(el('span','r',String(i+1)));r.appendChild(el('span','n',p.name));
-    if(p.gain)r.appendChild(el('span','g','+'+p.gain));
-    r.appendChild(el('span','s',String(p.score)));lb.appendChild(r);
-  });
+  renderRevealBoard();
   $('qAns').textContent='';
   $('qNext').textContent=H.qi+1>=H.qs.length?'Voir le classement final ▶':'Question suivante ▶';
   sendAll(revealMsg);
 }
+function renderRevealBoard(){
+  const lb=$('qLb');lb.textContent='';
+  const row=(rk,name,gain,score,color)=>{
+    const r=el('div','lb');r.appendChild(el('span','r',String(rk)));
+    const n=el('span','n',name);if(color)n.style.color=color;r.appendChild(n);
+    if(gain)r.appendChild(el('span','g','+'+gain));
+    r.appendChild(el('span','s',String(score)));lb.appendChild(r);
+  };
+  if(teamMode()){
+    lb.appendChild(el('h3',null,'Équipes'));
+    teamTable().forEach((tm,i)=>row(i+1,'Équipe '+tm.name,tm.gain,tm.score,tm.color));
+    lb.appendChild(el('h3',null,'Meilleurs joueurs'));
+    sortedPlayers().slice(0,3).forEach((p,i)=>row(i+1,p.name,p.gain,p.score));
+  }else sortedPlayers().slice(0,6).forEach((p,i)=>row(i+1,p.name,p.gain,p.score));
+}
+function renderEnd(){
+  const pod=$('podium');pod.textContent='';
+  const rest=$('rest');rest.textContent='';
+  const best=sortedPlayers()[0];
+  if(teamMode()){
+    const tt=teamTable();pod.classList.add('team');
+    for(const i of [1,0,2,3].filter(i=>tt[i])){
+      const d=el('div','pod p'+(i+1));
+      d.appendChild(el('div','medal',['🥇','🥈','🥉','4e'][i]));
+      d.appendChild(el('div','nm','Équipe '+tt[i].name));
+      d.appendChild(el('div','pt',tt[i].score+' pts (moyenne)'));
+      const dot=el('div','tdot');dot.style.background=tt[i].color;d.appendChild(dot);
+      pod.appendChild(d);
+    }
+    $('mvp').textContent=best?'⭐ Meilleur joueur : '+best.name+' ('+best.score+' pts)':'';
+    $('restTitle').textContent='Les équipes pour la suite (laser !)';
+    rest.className='tcols';
+    tt.forEach(tm=>{
+      const col=el('div','tcol');col.style.borderTopColor=tm.color;
+      const hd=el('div','thd','Équipe '+tm.name);hd.style.color=tm.color;col.appendChild(hd);
+      tm.members.slice().sort((a,b)=>b.score-a.score).forEach(p=>col.appendChild(el('div','tmem',p.name+' · '+p.score)));
+      rest.appendChild(col);
+    });
+    $('hAgain').textContent='Rejouer avec les mêmes équipes';
+  }else{
+    const s=sortedPlayers();pod.classList.remove('team');
+    for(const i of [1,0,2].filter(i=>s[i])){
+      const d=el('div','pod p'+(i+1));
+      d.appendChild(el('div','medal',['🥇','🥈','🥉'][i]));d.appendChild(el('div','nm',s[i].name));d.appendChild(el('div','pt',s[i].score+' pts'));
+      pod.appendChild(d);
+    }
+    $('mvp').textContent='';$('restTitle').textContent='';rest.className='rest';
+    s.slice(3,13).forEach((p,i)=>{const r=el('div','lb');r.appendChild(el('span','r',String(i+4)));r.appendChild(el('span','n',p.name));r.appendChild(el('span','s',String(p.score)));rest.appendChild(r);});
+    $('hAgain').textContent='Rejouer (mêmes joueurs)';
+  }
+}
 function endGame(){
   clearInterval(H.tick);H.phase='end';$('aud').pause();
   show('hEnd');
-  const s=sortedPlayers();
-  const pod=$('podium');pod.textContent='';
-  const order=[1,0,2].filter(i=>s[i]);
-  for(const i of order){
-    const d=el('div','pod p'+(i+1));
-    d.appendChild(el('div','medal',['🥇','🥈','🥉'][i]));d.appendChild(el('div','nm',s[i].name));d.appendChild(el('div','pt',s[i].score+' pts'));
-    pod.appendChild(d);
-  }
-  const rest=$('rest');rest.textContent='';
-  s.slice(3,13).forEach((p,i)=>{const r=el('div','lb');r.appendChild(el('span','r',String(i+4)));r.appendChild(el('span','n',p.name));r.appendChild(el('span','s',String(p.score)));rest.appendChild(r);});
-  sendAll(p=>({t:'end',rank:rankOf(p),score:p.score,n:H.players.size}));
+  renderEnd();
+  sendAll(endMsg);
 }
 function hostAdvance(){
   if(H.phase==='lobby')startGame();
@@ -2850,7 +3286,7 @@ function hostAdvance(){
 function hostAgain(){
   H.phase='lobby';H.qs=[];H.qi=-1;
   for(const p of H.players.values()){p.score=0;p.streak=0;}
-  show('hLobby');renderLobby();sendAll({t:'lobby',n:H.players.size});
+  show('hLobby');renderLobby();sendAll(lobbyMsg);
 }
 
 /* =====================================================================
@@ -2911,14 +3347,36 @@ function pRetry(){
 function pOnMsg(m){
   if(!m||!m.t)return;
   if(m.t==='hi'){P.joined=true;_tries=0;P.name=m.name;lsSet('flq_name',m.name);$('pHi').textContent='Salut '+m.name+' !';}
-  else if(m.t==='lobby'){clearInterval(P.tick);show('pWait');$('pWaitInfo').textContent=m.n+' joueur'+(m.n>1?'s':'')+' dans la partie';}
+  else if(m.t==='lobby')pLobby(m);
   else if(m.t==='q')pQuestion(m);
   else if(m.t==='reveal')pReveal(m);
   else if(m.t==='end')pEnd(m);
 }
+function setBadge(elm,team){
+  if(!team){elm.style.display='none';return;}
+  elm.style.display='';elm.textContent='Équipe '+team.name;elm.style.background=team.color;
+}
+function pLobby(m){
+  clearInterval(P.tick);show('pWait');
+  $('pWaitInfo').textContent=m.n+' joueur'+(m.n>1?'s':'')+' dans la partie';
+  const box=$('pTeamBox');box.textContent='';
+  if(m.mode&&m.mode!=='solo'){
+    if(m.team!=null&&m.teams[m.team]){
+      const b=el('span','tbadge');b.style.fontSize='22px';b.style.padding='10px 22px';setBadge(b,m.teams[m.team]);box.appendChild(b);
+    }
+    if(m.mode==='choose'){
+      box.appendChild(el('p','mut','Choisis ton équipe :'));
+      m.teams.forEach((tm,i)=>{
+        const bt=el('button','',(m.team===i?'✓ ':'')+'Équipe '+tm.name);bt.style.background=tm.color;
+        bt.onclick=()=>{try{P.conn.send({t:'team',i});}catch(e){}};
+        box.appendChild(bt);
+      });
+    }else if(m.team==null){box.appendChild(el('p','mut','Tu vas être placé dans une équipe…'));}
+  }
+}
 function pQuestion(m){
   P.qi=m.i;P.locked=m.picked!==null&&m.picked!==undefined;
-  show('pQ');
+  show('pQ');setBadge($('pqTeam'),m.team);
   $('pqNum').textContent='Question '+(m.i+1)+'/'+m.n;
   $('pqText').textContent=m.kind==='music'?'🎧 '+m.q:m.q;
   $('pqInfo').textContent=P.locked?'Réponse envoyée ✓':'';
@@ -2952,6 +3410,9 @@ function pReveal(m){
   $('prGain').textContent=m.correct?'+'+m.gain+' pts':'';
   $('prAns').textContent=m.correct?'':'C\'était : '+LET[m.ans]+' — '+m.ansText+(m.extra?'  ('+m.extra+')':'');
   $('prRank').textContent=(m.rank===1?'1er':m.rank+'e')+' sur '+m.n+' · '+m.score+' pts';
+  const tl=$('prTeam');
+  if(m.team){tl.style.display='';tl.style.background=m.team.color;tl.style.color='#0a0a18';tl.textContent='Équipe '+m.team.name+' : '+(m.teamRank===1?'1re':m.teamRank+'e')+' sur '+m.teamN+' · '+m.teamScore+' pts';}
+  else tl.style.display='none';
   $('prStreak').textContent=m.streak>=2?'🔥 '+m.streak+' bonnes réponses d\'affilée !':'';
 }
 function pEnd(m){
@@ -2959,11 +3420,15 @@ function pEnd(m){
   $('peIcon').textContent=m.rank===1?'🏆':m.rank<=3?'🏅':'🏁';
   $('peRank').textContent='Tu finis '+(m.rank===1?'1er':m.rank+'e')+' sur '+m.n;
   $('peScore').textContent=m.score+' points';
+  const te=$('peTeam');
+  if(m.team){te.style.display='';te.style.background=m.team.color;te.style.color='#0a0a18';te.textContent='Équipe '+m.team.name+' : '+(m.teamRank===1?'1re':m.teamRank+'e')+' sur '+m.teamN;if(m.teamRank===1)$('peIcon').textContent='🏆';}
+  else te.style.display='none';
 }
 
 /* ===================== démarrage ===================== */
 if(IS_TV){
   $('hStart').onclick=startGame;$('qNext').onclick=hostAdvance;$('hAgain').onclick=hostAgain;
+  $('sM').onchange=applySettings;$('sNT').onchange=applySettings;$('hShuffle').onclick=()=>{assignAll();renderLobby();sendAll(lobbyMsg);};
   document.addEventListener('keydown',e=>{
     if(['INPUT','SELECT','BUTTON'].includes(document.activeElement&&document.activeElement.tagName)&&e.key===' ')return;
     if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){e.preventDefault();hostAdvance();}
